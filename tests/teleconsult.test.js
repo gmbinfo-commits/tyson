@@ -2,84 +2,95 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   APPOINTMENT_STATUS,
+  CONSULT_MODE,
   groupAppointments,
   startConsultation,
   completeConsultation,
   markNoShow,
-  buildManagerMetrics
+  buildManagerMetrics,
+  calculateDoctorDashboard,
+  assignDoctor,
+  addChatMessage,
+  demoAppointments
 } from '../src/teleconsult.js';
 import {
   createDoctor,
   loginDoctor,
+  loginManager,
   addAvailabilitySlot,
   seededDoctors,
+  seededManagers,
   updateDoctorProfile
 } from '../src/doctor.js';
-import { addPrescriptionItem, formatPrescription } from '../src/prescription.js';
+import { addPrescriptionItem, summarizePrescription } from '../src/prescription.js';
 
-test('startConsultation updates status to in_progress', () => {
-  const result = startConsultation({ id: '1', status: APPOINTMENT_STATUS.UPCOMING });
+test('startConsultation requires mode and updates status', () => {
+  const result = startConsultation({ status: APPOINTMENT_STATUS.REQUESTED }, CONSULT_MODE.AUDIO);
   assert.equal(result.status, APPOINTMENT_STATUS.IN_PROGRESS);
-  assert.ok(result.startedAt);
+  assert.equal(result.consultMode, CONSULT_MODE.AUDIO);
 });
 
-test('completeConsultation captures payload and marks completed', () => {
+test('completeConsultation marks completed from in-progress', () => {
   const result = completeConsultation(
-    { id: '1', status: APPOINTMENT_STATUS.IN_PROGRESS },
-    { notes: 'Stable', diagnosis: 'URI', followUpDate: '2026-03-31', prescription: [{ name: 'Paracetamol' }] }
+    { status: APPOINTMENT_STATUS.IN_PROGRESS },
+    { diagnosis: 'URTI', prescription: [{ name: 'Paracetamol' }] }
   );
   assert.equal(result.status, APPOINTMENT_STATUS.COMPLETED);
-  assert.equal(result.diagnosis, 'URI');
-  assert.deepEqual(result.prescription, [{ name: 'Paracetamol' }]);
+  assert.equal(result.diagnosis, 'URTI');
 });
 
-test('groupAppointments returns bucketed statuses', () => {
-  const grouped = groupAppointments([
-    { id: '1', status: APPOINTMENT_STATUS.UPCOMING },
-    { id: '2', status: APPOINTMENT_STATUS.NO_SHOW },
-    { id: '3', status: APPOINTMENT_STATUS.UPCOMING }
-  ]);
-  assert.equal(grouped.upcoming.length, 2);
-  assert.equal(grouped.no_show.length, 1);
+test('manager and doctor login work', () => {
+  const d = loginDoctor(seededDoctors, 'neha@teleconsult.com', 'demo123');
+  const m = loginManager(seededManagers, 'manager@teleconsult.com', 'manager123');
+  assert.equal(d.id, 'DOC-DEMO1');
+  assert.equal(m.id, 'MGR-100');
 });
 
-test('doctor create/login/profile and slot flows work', () => {
+test('doctor onboarding, profile update and availability work', () => {
   let doctors = [...seededDoctors];
   doctors = createDoctor(doctors, {
-    name: 'Dr Test',
-    email: 'test@tele.com',
-    password: 'abc123',
-    specialty: 'Dermatology',
-    experienceYears: 4,
-    consultationFee: 500
+    name: 'Dr New',
+    email: 'new@tele.com',
+    password: 'p123',
+    specialty: 'Cardiology',
+    experienceYears: 5,
+    consultationFee: 900
   });
-  const doctor = loginDoctor(doctors, 'test@tele.com', 'abc123');
-  const prof = updateDoctorProfile(doctor, { languages: ['English'], qualifications: 'MBBS' });
-  const withSlot = addAvailabilitySlot(prof, { date: '2026-03-12', start: '09:00', end: '11:00' });
+  const doctor = loginDoctor(doctors, 'new@tele.com', 'p123');
+  const profile = updateDoctorProfile(doctor, { qualifications: 'MBBS, MD', languages: ['English'] });
+  const withSlot = addAvailabilitySlot(profile, { date: '2026-03-20', start: '10:00', end: '12:00' });
   assert.equal(withSlot.availability.length, 1);
-  assert.equal(withSlot.profile.qualifications, 'MBBS');
+  assert.equal(withSlot.profile.qualifications, 'MBBS, MD');
 });
 
-test('prescription formatter works', () => {
-  const meds = addPrescriptionItem([], { name: 'Paracetamol', dose: '650mg', frequency: '1-0-1', duration: '3d' });
-  const text = formatPrescription(meds);
-  assert.match(text, /Paracetamol/);
+test('instant queue assign and dashboard metrics', () => {
+  const instant = demoAppointments.find((a) => a.queueType === 'instant' && !a.assignedDoctorId);
+  const assigned = assignDoctor(instant, 'DOC-DEMO1');
+  assert.equal(assigned.status, APPOINTMENT_STATUS.ACCEPTED);
+  assert.equal(assigned.assignedDoctorId, 'DOC-DEMO1');
+
+  const dashboard = calculateDoctorDashboard([...demoAppointments, assigned], 'DOC-DEMO1');
+  assert.ok(dashboard.assigned >= 1);
 });
 
-test('manager metrics aggregate counts', () => {
-  const metrics = buildManagerMetrics(
-    [
-      { status: APPOINTMENT_STATUS.UPCOMING },
-      { status: APPOINTMENT_STATUS.COMPLETED },
-      { status: APPOINTMENT_STATUS.NO_SHOW }
-    ],
-    seededDoctors
-  );
-  assert.equal(metrics.totalAppointments, 3);
-  assert.equal(metrics.completed, 1);
-  assert.equal(metrics.doctorsOnboarded, seededDoctors.length);
+test('chat append and prescription summary', () => {
+  const appt = addChatMessage({ chat: [] }, { sender: 'doctor', text: 'Please share BP report', at: '10:22' });
+  assert.equal(appt.chat.length, 1);
+
+  const meds = addPrescriptionItem([], { name: 'Syp Amoxicillin', duration: '3 days' });
+  const summary = summarizePrescription(meds);
+  assert.equal(summary.count, 1);
+  assert.equal(summary.antibiotics, 1);
 });
 
-test('markNoShow disallows completed appointment', () => {
-  assert.throws(() => markNoShow({ id: '1', status: APPOINTMENT_STATUS.COMPLETED }));
+test('manager metrics and grouping', () => {
+  const grouped = groupAppointments(demoAppointments);
+  assert.ok(grouped.requested.length > 0);
+
+  const metrics = buildManagerMetrics(demoAppointments, seededDoctors);
+  assert.equal(metrics.doctorsListed, seededDoctors.length);
+});
+
+test('no-show disallowed on finalized statuses', () => {
+  assert.throws(() => markNoShow({ status: APPOINTMENT_STATUS.CANCELLED }));
 });

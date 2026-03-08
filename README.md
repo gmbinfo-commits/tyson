@@ -1,27 +1,32 @@
-# Teleconsult V1 (Expanded Prototype)
+# Teleconsult V1 (Improved Prototype)
 
-This prototype now includes the missing Teleconsult platform details you asked for:
+This version extends the demo with key flows requested from your existing portal patterns:
 
-- **Doctor creation (onboarding)** with specialty, experience, and consultation fee
-- **Doctor login/logout** with basic credential validation
-- **Doctor profile management** (about, languages, qualifications)
-- **Doctor slot availability management** (date/start/end slot creation)
-- **Consultation queue** with lifecycle transitions (Upcoming → In Progress → Completed / No Show)
-- **Structured prescription builder** (medicine, dose, frequency, duration)
-- **Manager dashboard** with aggregate metrics and doctor roster snapshot
+- Doctor login + create-doctor onboarding
+- **Separate manager login** and manager workspace
+- Queue split by **scheduled** and **instant** cases
+- Start consultation flow with **Audio / Video** call choice
+- Instant case pickup workflow for doctors
+- In-consult **chat room** and uploaded report visibility
+- Consultation form with prescription builder + completion
+- Doctor dashboard with performance KPIs and prescription insights
+- Mobile-friendly responsive layout (works like app-style web shell)
 
-## Run locally
+## Demo logins
+
+- Doctor: `neha@teleconsult.com` / `demo123`
+- Manager: `manager@teleconsult.com` / `manager123`
+
+## Run
 
 ```bash
 npm start
 ```
 
-Open `http://localhost:4173`.
+Open: `http://localhost:4173`
 
-## Tests
+## Test
 
 ```bash
 npm test
 ```
-
-Tests cover appointment state transitions, doctor onboarding/login/profile/availability, prescription formatting, and manager metrics.
