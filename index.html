@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teleconsult V1</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Teleconsult V1 Platform</h1>
+      <p>Doctor onboarding, login, scheduling, consultation, and manager oversight.</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel" id="auth-panel">
+        <h2>Access</h2>
+        <div class="tabs">
+          <button class="tab active" data-auth-tab="login">Doctor Login</button>
+          <button class="tab" data-auth-tab="create">Create Doctor</button>
+        </div>
+
+        <form id="login-form" class="form-block">
+          <label>Email <input id="login-email" type="email" required /></label>
+          <label>Password <input id="login-password" type="password" required /></label>
+          <button class="primary" type="submit">Login</button>
+        </form>
+
+        <form id="create-doctor-form" class="form-block hidden">
+          <label>Doctor Name <input id="doctor-name" required /></label>
+          <label>Email <input id="doctor-email" type="email" required /></label>
+          <label>Password <input id="doctor-password" type="password" required /></label>
+          <label>Specialty <input id="doctor-specialty" required /></label>
+          <label>Experience (years) <input id="doctor-experience" type="number" min="0" required /></label>
+          <label>Consultation Fee <input id="doctor-fee" type="number" min="0" required /></label>
+          <button class="primary" type="submit">Create Doctor</button>
+        </form>
+
+        <div id="auth-result" class="muted"></div>
+      </section>
+
+      <section class="panel" id="doctor-panel">
+        <div class="panel-head">
+          <h2>Doctor Workspace</h2>
+          <button id="logout-btn" class="ghost">Logout</button>
+        </div>
+        <p id="doctor-status" class="muted">Not logged in.</p>
+
+        <div class="tabs">
+          <button class="tab feature-tab active" data-feature="queue">Consult Queue</button>
+          <button class="tab feature-tab" data-feature="profile">Doctor Profile</button>
+          <button class="tab feature-tab" data-feature="availability">Availability Slots</button>
+          <button class="tab feature-tab" data-feature="manager">Manager Dashboard</button>
+        </div>
+
+        <section id="feature-queue" class="feature-view">
+          <h3>Today's Queue</h3>
+          <div class="tabs">
+            <button class="tab queue-tab active" data-tab="upcoming">Upcoming</button>
+            <button class="tab queue-tab" data-tab="in_progress">In Progress</button>
+            <button class="tab queue-tab" data-tab="completed">Completed</button>
+            <button class="tab queue-tab" data-tab="no_show">No Show</button>
+          </div>
+          <div class="split">
+            <div id="appointment-list"></div>
+            <div id="consultation-area">
+              <div id="empty-state">Select an appointment to begin consultation.</div>
+              <div id="consultation-view" class="hidden">
+                <h4 id="patient-title"></h4>
+                <p id="patient-meta"></p>
+                <p><strong>Symptoms:</strong> <span id="patient-symptoms"></span></p>
+                <p><strong>Reports:</strong> <span id="patient-reports"></span></p>
+                <div class="actions">
+                  <button id="start-btn" class="primary">Start Consultation</button>
+                  <button id="noshow-btn" class="danger">Mark No Show</button>
+                </div>
+                <form id="consult-form" class="form-block">
+                  <label>Clinical Notes <textarea id="notes" rows="3"></textarea></label>
+                  <label>Diagnosis <input id="diagnosis" /></label>
+                  <label>Follow-up Date <input id="followup" type="date" /></label>
+                  <fieldset>
+                    <legend>Prescription Builder</legend>
+                    <div class="prescription-row">
+                      <input id="med-name" placeholder="Medicine" />
+                      <input id="med-dose" placeholder="Dose" />
+                      <input id="med-frequency" placeholder="Frequency" />
+                      <input id="med-duration" placeholder="Duration" />
+                      <button id="add-med-btn" type="button" class="ghost">Add</button>
+                    </div>
+                    <ul id="prescription-list"></ul>
+                  </fieldset>
+                  <button class="primary" type="submit">Complete Consultation</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="feature-profile" class="feature-view hidden">
+          <h3>Doctor Profile</h3>
+          <form id="profile-form" class="form-block">
+            <label>About <textarea id="profile-about" rows="3"></textarea></label>
+            <label>Languages (comma separated) <input id="profile-languages" /></label>
+            <label>Qualifications <input id="profile-qualifications" /></label>
+            <button class="primary" type="submit">Save Profile</button>
+          </form>
+        </section>
+
+        <section id="feature-availability" class="feature-view hidden">
+          <h3>Slot Availability</h3>
+          <form id="availability-form" class="form-block">
+            <label>Date <input id="slot-date" type="date" required /></label>
+            <label>Start Time <input id="slot-start" type="time" required /></label>
+            <label>End Time <input id="slot-end" type="time" required /></label>
+            <button class="primary" type="submit">Add Slot</button>
+          </form>
+          <ul id="availability-list"></ul>
+        </section>
+
+        <section id="feature-manager" class="feature-view hidden">
+          <h3>Manager Dashboard</h3>
+          <div id="manager-metrics" class="metrics-grid"></div>
+          <h4>Doctors</h4>
+          <div id="manager-doctors"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+:root { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+body { margin: 0; background: #f5f7fb; color: #1f2937; }
+header { background: #4f46e5; color: #fff; padding: 16px 24px; }
+header h1 { margin: 0; font-size: 22px; }
+header p { margin: 6px 0 0; opacity: 0.92; }
+.layout { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px; }
+.panel { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08); }
+.panel-head { display: flex; justify-content: space-between; align-items: center; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.tab { border: 1px solid #c7d2fe; background: #eef2ff; color: #3730a3; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
+.tab.active { background: #4f46e5; color: #fff; }
+.split { display: grid; grid-template-columns: 320px 1fr; gap: 12px; }
+.card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; margin-bottom: 8px; cursor: pointer; }
+.card.active { border-color: #4f46e5; background: #eef2ff; }
+.form-block { display: grid; gap: 10px; }
+label { display: grid; gap: 4px; font-size: 14px; }
+input, textarea, button { font: inherit; }
+input, textarea { border: 1px solid #d1d5db; border-radius: 8px; padding: 8px; }
+button { border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+button.primary { background: #4f46e5; color: #fff; }
+button.danger { background: #dc2626; color: #fff; }
+button.ghost { background: #e5e7eb; color: #111827; }
+.actions { display: flex; gap: 8px; margin: 8px 0; }
+.hidden { display: none; }
+.muted { color: #6b7280; }
+.prescription-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 8px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.metric { background: #eef2ff; border-radius: 8px; padding: 10px; }
+.metric h5 { margin: 0 0 4px; text-transform: capitalize; }
+.metric p { margin: 0; font-size: 22px; font-weight: 600; }
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 1fr; }
+  .split { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+  .prescription-row { grid-template-columns: 1fr; }
+}
