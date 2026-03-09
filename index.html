@@ -1,24 +1,194 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TeleOps Platform</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <div class="layout">
-    <aside id="sidebar" class="sidebar"></aside>
-
-    <div class="main-wrap">
-      <header id="topbar" class="topbar"></header>
-      <section id="login-area"></section>
-      <main id="content" class="content"></main>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TeleOps Platform</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside id="sidebar" class="sidebar"></aside>
+      <div class="main-wrap">
+        <header id="topbar" class="topbar"></header>
+        <section id="login-area"></section>
+        <main id="content" class="content"></main>
+      </div>
+      <aside id="drawer" class="drawer hidden"></aside>
     </div>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Teleconsult V1</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Teleconsult Console</h1>
+      <p>Mobile-first doctor + manager operations</p>
+    </header>
 
-    <aside id="drawer" class="drawer hidden"></aside>
-  </div>
+    <main class="app-shell">
+      <section class="card" id="auth-card">
+        <h2>Login</h2>
+        <div class="tabs">
+          <button class="tab active" data-role-tab="doctor">Doctor</button>
+          <button class="tab" data-role-tab="manager">Manager</button>
+          <button class="tab" data-role-tab="onboard">Create Doctor</button>
+        </div>
 
-  <script type="module" src="src/app.js"></script>
-</body>
+        <form id="doctor-login-form" class="form-grid">
+          <label>Email <input id="doctor-login-email" type="email" required /></label>
+          <label>Password <input id="doctor-login-password" type="password" required /></label>
+          <button class="btn primary" type="submit">Doctor Login</button>
+        </form>
+
+        <form id="manager-login-form" class="form-grid hidden">
+          <label>Email <input id="manager-login-email" type="email" required /></label>
+          <label>Password <input id="manager-login-password" type="password" required /></label>
+          <button class="btn primary" type="submit">Manager Login</button>
+        </form>
+
+        <form id="doctor-create-form" class="form-grid hidden">
+          <label>Name <input id="doctor-name" required /></label>
+          <label>Email <input id="doctor-email" type="email" required /></label>
+          <label>Password <input id="doctor-password" type="password" required /></label>
+          <label>Specialty <input id="doctor-specialty" required /></label>
+          <label>Experience <input id="doctor-experience" type="number" min="0" required /></label>
+          <label>Consult Fee <input id="doctor-fee" type="number" min="0" required /></label>
+          <button class="btn primary" type="submit">Create Doctor Profile</button>
+        </form>
+        <p id="auth-message" class="muted"></p>
+      </section>
+
+      <section class="card hidden" id="doctor-workspace">
+        <div class="row between">
+          <h2>Doctor Workspace</h2>
+          <button class="btn ghost" id="doctor-logout">Logout</button>
+        </div>
+        <p id="doctor-heading" class="muted"></p>
+
+        <div class="tabs">
+          <button class="tab workspace-tab active" data-workspace-tab="queue">Queue</button>
+          <button class="tab workspace-tab" data-workspace-tab="dashboard">Dashboard</button>
+          <button class="tab workspace-tab" data-workspace-tab="profile">Profile</button>
+          <button class="tab workspace-tab" data-workspace-tab="availability">Availability</button>
+        </div>
+
+        <section id="ws-queue" class="workspace-view">
+          <div class="tabs">
+            <button class="tab queue-type-tab active" data-queue-type="scheduled">Scheduled</button>
+            <button class="tab queue-type-tab" data-queue-type="instant">Instant</button>
+            <button class="tab status-tab active" data-status-tab="requested">Requested</button>
+            <button class="tab status-tab" data-status-tab="accepted">Accepted</button>
+            <button class="tab status-tab" data-status-tab="in_progress">In Progress</button>
+            <button class="tab status-tab" data-status-tab="completed">Completed</button>
+          </div>
+
+          <div class="grid-two">
+            <div>
+              <div id="queue-list"></div>
+            </div>
+
+            <div id="appointment-detail" class="detail hidden">
+              <h3 id="appt-title"></h3>
+              <p id="appt-meta" class="muted"></p>
+              <p><strong>Symptoms:</strong> <span id="appt-symptoms"></span></p>
+              <p><strong>Reports:</strong> <span id="appt-reports"></span></p>
+              <div class="row">
+                <button class="btn primary" id="open-start-consult">Start Consultation</button>
+                <button class="btn" id="pick-instant">Pick Instant Case</button>
+                <button class="btn danger" id="mark-no-show">No Show</button>
+              </div>
+
+              <div class="chat-box">
+                <h4>Patient Chat</h4>
+                <div id="chat-messages"></div>
+                <div class="row">
+                  <input id="chat-input" placeholder="Type message for patient" />
+                  <button class="btn primary" id="send-chat">Send</button>
+                </div>
+              </div>
+
+              <form id="consult-form" class="form-grid">
+                <label>Chief Complaints <textarea id="notes" rows="2"></textarea></label>
+                <label>Diagnosis <input id="diagnosis" /></label>
+                <label>Advice <textarea id="advice" rows="2"></textarea></label>
+                <label>Follow-up Date <input id="followup" type="date" /></label>
+                <fieldset>
+                  <legend>Prescription</legend>
+                  <div class="rx-grid">
+                    <input id="med-name" placeholder="Medicine" />
+                    <input id="med-dose" placeholder="Dose" />
+                    <input id="med-frequency" placeholder="Frequency" />
+                    <input id="med-duration" placeholder="Duration" />
+                    <input id="med-remark" placeholder="Remark" />
+                    <button class="btn ghost" id="add-med" type="button">Add</button>
+                  </div>
+                  <ul id="rx-list"></ul>
+                </fieldset>
+                <button class="btn primary" type="submit">Save & Complete Consultation</button>
+              </form>
+            </div>
+            <p id="empty-detail" class="muted">Select a case from queue.</p>
+          </div>
+        </section>
+
+        <section id="ws-dashboard" class="workspace-view hidden">
+          <h3>Doctor Performance Dashboard</h3>
+          <div class="metrics" id="doctor-metrics"></div>
+          <h4>Prescription Guidance</h4>
+          <div class="metrics" id="doctor-prescription-insights"></div>
+        </section>
+
+        <section id="ws-profile" class="workspace-view hidden">
+          <h3>Doctor Profile</h3>
+          <form id="profile-form" class="form-grid">
+            <label>About <textarea id="profile-about" rows="2"></textarea></label>
+            <label>Languages (comma separated) <input id="profile-languages" /></label>
+            <label>Qualifications <input id="profile-qualifications" /></label>
+            <button class="btn primary" type="submit">Update Profile</button>
+          </form>
+        </section>
+
+        <section id="ws-availability" class="workspace-view hidden">
+          <h3>Slot Availability</h3>
+          <form id="availability-form" class="form-grid">
+            <label>Date <input id="slot-date" type="date" required /></label>
+            <label>Start <input id="slot-start" type="time" required /></label>
+            <label>End <input id="slot-end" type="time" required /></label>
+            <button class="btn primary" type="submit">Add Slot</button>
+          </form>
+          <ul id="availability-list"></ul>
+        </section>
+      </section>
+
+      <section class="card hidden" id="manager-workspace">
+        <div class="row between">
+          <h2>Manager Workspace</h2>
+          <button class="btn ghost" id="manager-logout">Logout</button>
+        </div>
+        <p id="manager-heading" class="muted"></p>
+
+        <h3>Portal Overview</h3>
+        <div class="metrics" id="manager-metrics"></div>
+
+        <h3>Doctors Listed</h3>
+        <div id="manager-doctors"></div>
+
+        <h3>Instant Queue Management</h3>
+        <div id="manager-instant-queue"></div>
+      </section>
+    </main>
+
+    <dialog id="consult-mode-modal">
+      <h3>Start Consultation</h3>
+      <p>Select consultation mode.</p>
+      <div class="row">
+        <button class="btn primary" id="start-audio">Start Audio Call</button>
+        <button class="btn primary" id="start-video">Start Video Call</button>
+      </div>
+      <button class="btn ghost" id="close-modal">Cancel</button>
+    </dialog>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
 </html>
